@@ -1,0 +1,955 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MonkeyWorks Audio Hijacker</title>
+  <meta name="description" content="MonkeyWorks Audio Hijacker – Captura audio del sistema y micrófono en una sola mezcla estéreo. Diseñado por y para audio nerds." />
+  <style>
+    :root {
+      --bg: #05060a;
+      --bg-alt: #0c1018;
+      --accent: #ff6b35;
+      --accent-soft: rgba(255, 107, 53, 0.15);
+      --text: #f4f4f4;
+      --muted: #a9b0c2;
+      --border: #242a3b;
+      --radius-xl: 18px;
+      --shadow-soft: 0 18px 45px rgba(0, 0, 0, 0.55);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: radial-gradient(circle at top, #141b2c 0, #05060a 50%, #020308 100%);
+      color: var(--text);
+      line-height: 1.6;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .page {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      backdrop-filter: blur(16px);
+      background: linear-gradient(to bottom, rgba(5, 6, 10, 0.95), rgba(5, 6, 10, 0.7), transparent);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+    }
+
+    .nav {
+      max-width: 1080px;
+      margin: 0 auto;
+      padding: 0.75rem 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+
+    .logo-mark {
+      width: 34px;
+      height: 34px;
+      border-radius: 999px;
+      background: radial-gradient(circle at 20% 20%, #ffe66d, #ff6b35 35%, #ff206e 70%, #05060a 100%);
+      box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.08), 0 8px 20px rgba(0, 0, 0, 0.6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      font-weight: 800;
+      color: #05060a;
+    }
+
+    .logo-text-main {
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      font-size: 0.9rem;
+      text-transform: uppercase;
+    }
+
+    .logo-text-sub {
+      font-size: 0.7rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 1.3rem;
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+
+    .nav-links a:hover {
+      color: var(--text);
+    }
+
+    .nav-cta {
+      padding: 0.45rem 1rem;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      font-size: 0.8rem;
+      font-weight: 500;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      background: linear-gradient(120deg, rgba(255, 107, 53, 0.22), rgba(255, 107, 53, 0.04));
+    }
+
+    .nav-cta span {
+      font-size: 1rem;
+    }
+
+    main {
+      flex: 1;
+    }
+
+    .hero {
+      max-width: 1080px;
+      margin: 0 auto;
+      padding: 2.8rem 1.5rem 2.5rem;
+      display: grid;
+      grid-template-columns: minmax(0, 1.3fr) minmax(0, 1.1fr);
+      gap: 2.5rem;
+      align-items: center;
+    }
+
+    .hero-eyebrow {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+      color: var(--muted);
+      margin-bottom: 0.85rem;
+    }
+
+    .hero-title {
+      font-size: clamp(2.3rem, 3vw + 1rem, 2.9rem);
+      line-height: 1.1;
+      margin: 0 0 0.9rem;
+    }
+
+    .hero-title span {
+      background: linear-gradient(120deg, #ffb347, #ff6b35, #ff206e);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .hero-subtitle {
+      font-size: 0.98rem;
+      color: var(--muted);
+      max-width: 34rem;
+      margin-bottom: 1.4rem;
+    }
+
+    .hero-badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.6rem;
+      margin-bottom: 1.4rem;
+    }
+
+    .badge {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      padding: 0.25rem 0.7rem;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      background: rgba(0, 0, 0, 0.35);
+      color: var(--muted);
+    }
+
+    .badge-accent {
+      border-color: rgba(255, 107, 53, 0.7);
+      background: var(--accent-soft);
+      color: #ffd7c3;
+    }
+
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.9rem;
+      align-items: center;
+      margin-bottom: 1.4rem;
+    }
+
+    .btn {
+      border: none;
+      outline: none;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 0.9rem;
+      padding: 0.7rem 1.4rem;
+      border-radius: 999px;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      text-decoration: none;
+      transition: transform 0.08s ease, box-shadow 0.08s ease, background 0.2s ease, opacity 0.15s ease;
+      white-space: nowrap;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #ff6b35, #ff206e);
+      color: #05060a;
+      font-weight: 600;
+      box-shadow: 0 14px 30px rgba(0, 0, 0, 0.65);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 18px 40px rgba(0, 0, 0, 0.8);
+      opacity: 0.96;
+    }
+
+    .btn-ghost {
+      background: rgba(4, 6, 14, 0.7);
+      color: var(--muted);
+      border: 1px solid rgba(255, 255, 255, 0.16);
+    }
+
+    .btn-ghost:hover {
+      background: rgba(16, 22, 40, 0.9);
+      color: var(--text);
+    }
+
+    .hotkey-hint {
+      font-size: 0.7rem;
+      color: var(--muted);
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .kbd {
+      border-radius: 6px;
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      padding: 0.1rem 0.3rem;
+      font-size: 0.67rem;
+      background: rgba(0, 0, 0, 0.5);
+    }
+
+    .hero-footnote {
+      font-size: 0.7rem;
+      color: var(--muted);
+    }
+
+    .hero-panel {
+      background: radial-gradient(circle at top, #20273a, #05060a 65%);
+      border-radius: 26px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      box-shadow: var(--shadow-soft);
+      padding: 1.2rem 1.2rem 1.25rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 0.8rem;
+    }
+
+    .hero-panel-app-name {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.2em;
+      color: var(--muted);
+    }
+
+    .hero-panel-dots {
+      display: flex;
+      gap: 0.3rem;
+    }
+
+    .hero-panel-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    .hero-panel-dot:nth-child(1) { background: #ff5f57; }
+    .hero-panel-dot:nth-child(2) { background: #febc2e; }
+    .hero-panel-dot:nth-child(3) { background: #28c840; }
+
+    .meter-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1.2fr) minmax(0, 1.2fr);
+      gap: 0.6rem;
+      margin-bottom: 0.7rem;
+    }
+
+    .meter {
+      background: rgba(0, 0, 0, 0.45);
+      border-radius: var(--radius-xl);
+      padding: 0.6rem 0.7rem 0.7rem;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .meter-label {
+      font-size: 0.7rem;
+      color: var(--muted);
+      margin-bottom: 0.2rem;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .meter-bar {
+      position: relative;
+      height: 10px;
+      border-radius: 999px;
+      overflow: hidden;
+      background: linear-gradient(90deg, #202431, #121622);
+    }
+
+    .meter-fill {
+      position: absolute;
+      inset: 0;
+      width: 72%;
+      background: linear-gradient(90deg, #31e981, #ffe66d, #ff6b35, #ff206e);
+      opacity: 0.9;
+    }
+
+    .meter-fill.meter-fill-2 {
+      width: 61%;
+    }
+
+    .meter-grid {
+      position: absolute;
+      inset: 0;
+      background-image: linear-gradient(to right, rgba(255, 255, 255, 0.09) 1px, transparent 1px);
+      background-size: 6px 100%;
+      mix-blend-mode: soft-light;
+      opacity: 0.7;
+    }
+
+    .panel-bottom {
+      margin-top: 0.9rem;
+      display: grid;
+      grid-template-columns: minmax(0, 1.4fr) minmax(0, 1.1fr);
+      gap: 0.8rem;
+      align-items: center;
+    }
+
+    .panel-track {
+      font-size: 0.76rem;
+      background: rgba(0, 0, 0, 0.6);
+      border-radius: var(--radius-xl);
+      padding: 0.6rem 0.7rem;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+    }
+
+    .panel-track-label {
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      font-size: 0.65rem;
+      color: var(--muted);
+      margin-bottom: 0.2rem;
+    }
+
+    .panel-track-main {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 0.15rem;
+    }
+
+    .panel-track-name {
+      font-weight: 500;
+      font-size: 0.78rem;
+    }
+
+    .panel-track-time {
+      font-size: 0.7rem;
+      color: var(--muted);
+    }
+
+    .panel-mini-wave {
+      height: 18px;
+      border-radius: 999px;
+      background-image: linear-gradient(90deg, rgba(255, 255, 255, 0.05) 2px, transparent 2px);
+      background-size: 6px 100%;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .panel-mini-wave span {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(120deg, rgba(255, 255, 255, 0.1), rgba(255, 107, 53, 0.22));
+      mix-blend-mode: screen;
+      opacity: 0.8;
+    }
+
+    .panel-controls {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .panel-btn-row {
+      display: flex;
+      gap: 0.4rem;
+    }
+
+    .panel-btn {
+      flex: 1;
+      font-size: 0.74rem;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      padding: 0.4rem 0.6rem;
+      background: rgba(0, 0, 0, 0.55);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.3rem;
+      color: var(--muted);
+    }
+
+    .panel-btn-primary {
+      background: radial-gradient(circle at 20% 0, #ffe66d, #ff6b35);
+      color: #05060a;
+      font-weight: 600;
+      border-color: rgba(255, 255, 255, 0.22);
+    }
+
+    .panel-led {
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      color: var(--muted);
+    }
+
+    .led-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 999px;
+      background: radial-gradient(circle, #31e981, #0b4228);
+      box-shadow: 0 0 10px rgba(49, 233, 129, 0.8);
+    }
+
+    .panel-tagline {
+      font-size: 0.7rem;
+      color: var(--muted);
+    }
+
+    .section {
+      max-width: 1080px;
+      margin: 0 auto;
+      padding: 1.2rem 1.5rem 2.6rem;
+    }
+
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 1rem;
+      margin-bottom: 1.4rem;
+    }
+
+    .section-title {
+      font-size: 1.2rem;
+    }
+
+    .section-kicker {
+      font-size: 0.9rem;
+      color: var(--muted);
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 1rem;
+    }
+
+    .feature-card {
+      background: var(--bg-alt);
+      border-radius: var(--radius-xl);
+      border: 1px solid var(--border);
+      padding: 0.9rem;
+      font-size: 0.86rem;
+      box-shadow: 0 10px 28px rgba(0, 0, 0, 0.55);
+    }
+
+    .feature-icon {
+      width: 26px;
+      height: 26px;
+      border-radius: 999px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 0.35rem;
+      font-size: 1rem;
+      background: rgba(255, 107, 53, 0.16);
+    }
+
+    .feature-title {
+      font-weight: 600;
+      margin-bottom: 0.2rem;
+      font-size: 0.9rem;
+    }
+
+    .feature-text {
+      color: var(--muted);
+      font-size: 0.82rem;
+    }
+
+    .section-columns {
+      display: grid;
+      grid-template-columns: minmax(0, 1.2fr) minmax(0, 1.1fr);
+      gap: 1.6rem;
+      align-items: flex-start;
+    }
+
+    .card {
+      background: var(--bg-alt);
+      border-radius: var(--radius-xl);
+      border: 1px solid var(--border);
+      padding: 1rem;
+      font-size: 0.86rem;
+      box-shadow: 0 10px 28px rgba(0, 0, 0, 0.55);
+    }
+
+    .card-title {
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      font-size: 0.95rem;
+    }
+
+    .list {
+      padding-left: 1.1rem;
+      margin: 0.4rem 0 0;
+      color: var(--muted);
+      font-size: 0.82rem;
+    }
+
+    .list li {
+      margin-bottom: 0.25rem;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      padding: 0.25rem 0.55rem;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      background: rgba(0, 0, 0, 0.5);
+      font-size: 0.7rem;
+      color: var(--muted);
+      margin-bottom: 0.3rem;
+    }
+
+    .download-section {
+      margin-top: 0.7rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+    }
+
+    footer {
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      padding: 1.4rem 1.5rem 1.6rem;
+      font-size: 0.78rem;
+      color: var(--muted);
+      background: #05060a;
+    }
+
+    .footer-inner {
+      max-width: 1080px;
+      margin: 0 auto;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.9rem;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .footer-links {
+      display: flex;
+      gap: 0.9rem;
+      flex-wrap: wrap;
+    }
+
+    .footer-links a:hover {
+      color: var(--text);
+    }
+
+    @media (max-width: 860px) {
+      .hero {
+        grid-template-columns: minmax(0, 1fr);
+      }
+
+      .hero-panel {
+        order: -1;
+      }
+
+      .features-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .section-columns {
+        grid-template-columns: minmax(0, 1fr);
+      }
+    }
+
+    @media (max-width: 600px) {
+      .nav {
+        padding-inline: 1rem;
+      }
+
+      .nav-links {
+        display: none;
+      }
+
+      .hero {
+        padding-inline: 1rem;
+      }
+
+      .section {
+        padding-inline: 1rem;
+      }
+
+      .features-grid {
+        grid-template-columns: minmax(0, 1fr);
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <!-- Navegación -->
+    <header>
+      <div class="nav">
+        <div class="logo">
+          <div class="logo-mark">M</div>
+          <div>
+            <div class="logo-text-main">MonkeyWorks</div>
+            <div class="logo-text-sub">Audio Hijacker</div>
+          </div>
+        </div>
+        <nav class="nav-links">
+          <a href="#features">Características</a>
+          <a href="#how-it-works">Cómo funciona</a>
+          <a href="#download">Descarga</a>
+          <a href="#support">Soporte</a>
+          <a href="#download" class="nav-cta">
+            Descargar .exe <span>↓</span>
+          </a>
+        </nav>
+      </div>
+    </header>
+
+    <main>
+      <!-- HERO -->
+      <section class="hero">
+        <div>
+          <div class="hero-eyebrow">Herramienta de captura de audio para humanos que viven en dB</div>
+          <h1 class="hero-title">
+            <span>MonkeyWorks Audio Hijacker</span><br />
+            captura lo que escuchas + lo que dices.
+          </h1>
+          <p class="hero-subtitle">
+            Graba audio del sistema y micrófono en una sola mezcla estéreo limpia. Perfecto para
+            podcasts, radio, streaming, clases, y para dejar de pelearte con el routing.
+          </p>
+
+          <div class="hero-badges">
+            <div class="badge badge-accent">Live to 2-track</div>
+            <div class="badge">Windows · NAudio · WASAPI</div>
+            <div class="badge">Diseñado en Hivari Studio</div>
+          </div>
+
+          <div class="hero-actions">
+            <!-- TODO: actualiza href con tu link real de descarga -->
+            <a href="#" class="btn btn-primary">
+              Descargar para Windows
+              <span>💾</span>
+            </a>
+            <!-- TODO: actualiza href con tu video demo (YouTube, Vimeo, etc.) -->
+            <a href="#" class="btn btn-ghost">
+              Ver video demo
+              <span>▶</span>
+            </a>
+          </div>
+
+          <div class="hotkey-hint">
+            <span class="kbd">Tip</span>
+            <span>Piensa en esto como tu grabadora de master externa, pero en software.</span>
+          </div>
+
+          <p class="hero-footnote">
+            *Sin drivers raros, sin cables virtuales infinitos, sin menús escondidos de 40 clics.
+          </p>
+        </div>
+
+        <!-- Panel de “UI” fake para mostrar el concepto -->
+        <aside class="hero-panel" aria-hidden="true">
+          <div class="hero-panel-header">
+            <div class="hero-panel-app-name">Audio Hijacker · Capture</div>
+            <div class="hero-panel-dots">
+              <div class="hero-panel-dot"></div>
+              <div class="hero-panel-dot"></div>
+              <div class="hero-panel-dot"></div>
+            </div>
+          </div>
+
+          <div class="meter-row">
+            <div class="meter">
+              <div class="meter-label">
+                <span>Sistema</span>
+                <span>-9.2 dBFS</span>
+              </div>
+              <div class="meter-bar">
+                <div class="meter-fill"></div>
+                <div class="meter-grid"></div>
+              </div>
+            </div>
+            <div class="meter">
+              <div class="meter-label">
+                <span>Micrófono</span>
+                <span>-12.5 dBFS</span>
+              </div>
+              <div class="meter-bar">
+                <div class="meter-fill meter-fill-2"></div>
+                <div class="meter-grid"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="panel-bottom">
+            <div class="panel-track">
+              <div class="panel-track-label">Live to 2-Track</div>
+              <div class="panel-track-main">
+                <div class="panel-track-name">MonkeyWorks MixBus</div>
+                <div class="panel-track-time">00:17:23</div>
+              </div>
+              <div class="panel-mini-wave">
+                <span></span>
+              </div>
+            </div>
+
+            <div class="panel-controls">
+              <div class="panel-btn-row">
+                <div class="panel-btn panel-btn-primary">
+                  ● REC
+                </div>
+                <div class="panel-btn">
+                  ⏸ Pausa
+                </div>
+              </div>
+              <div class="panel-led">
+                <div class="led-dot"></div>
+                Grabando sistema + mic
+              </div>
+              <div class="panel-tagline">
+                Exporta un .wav estéreo listo para enviar, compartir o masterizar.
+              </div>
+            </div>
+          </div>
+        </aside>
+      </section>
+
+      <!-- CARACTERÍSTICAS -->
+      <section class="section" id="features">
+        <div class="section-header">
+          <h2 class="section-title">Lo que hace que Audio Hijacker sea útil</h2>
+          <p class="section-kicker">
+            Menos menú, más audio. Pensado como herramienta de batalla diaria.
+          </p>
+        </div>
+
+        <div class="features-grid">
+          <article class="feature-card">
+            <div class="feature-icon">🎛</div>
+            <h3 class="feature-title">Sistema + mic en una mezcla</h3>
+            <p class="feature-text">
+              Captura simultáneamente el audio que sale de tu computadora y tu micrófono USB
+              o de interfaz, sumados en un 2-track estéreo limpio y estable.
+            </p>
+          </article>
+
+          <article class="feature-card">
+            <div class="feature-icon">🔴</div>
+            <h3 class="feature-title">Live recording sin complicarte</h3>
+            <p class="feature-text">
+              Ideal para programas de radio, podcasts, clases online, sesiones de feedback o
+              explicar un proyecto mientras suena en tu DAW.
+            </p>
+          </article>
+
+          <article class="feature-card">
+            <div class="feature-icon">📂</div>
+            <h3 class="feature-title">Carpeta de “tomas buenas”</h3>
+            <p class="feature-text">
+              Todas las grabaciones caen a una carpeta organizada, con nombres claros por fecha
+              y hora. Copiar, respaldar o enviar el archivo es cuestión de segundos.
+            </p>
+          </article>
+
+          <article class="feature-card">
+            <div class="feature-icon">🎚</div>
+            <h3 class="feature-title">Control de niveles sensato</h3>
+            <p class="feature-text">
+              Los niveles de sistema y mic se monitorean por separado para evitar saturar y
+              mantener headroom suficiente para el procesamiento posterior.
+            </p>
+          </article>
+
+          <article class="feature-card">
+            <div class="feature-icon">💻</div>
+            <h3 class="feature-title">Pensado para Windows</h3>
+            <p class="feature-text">
+              Utiliza WASAPI / NAudio para aprovechar la captura loopback de Windows sin
+              instalar drivers exóticos ni crear rutas virtuales imposibles.
+            </p>
+          </article>
+
+          <article class="feature-card">
+            <div class="feature-icon">🧠</div>
+            <h3 class="feature-title">Hecho por gente de audio</h3>
+            <p class="feature-text">
+              El flujo mental es el de cabina: eliges fuente, revisas niveles, presionas REC
+              y te olvidas. Una herramienta discreta que simplemente hace su chamba.
+            </p>
+          </article>
+        </div>
+      </section>
+
+      <!-- CÓMO FUNCIONA + DESCARGA -->
+      <section class="section" id="how-it-works">
+        <div class="section-columns">
+          <article class="card">
+            <h2 class="card-title">¿Cómo funciona?</h2>
+            <p>
+              La idea es simple: tomar lo que ya suena en tu computadora (loopback de sistema)
+              y sumarlo con tu micrófono seleccionado, para entregar un único archivo estéreo.
+            </p>
+            <ol class="list">
+              <li>Abres MonkeyWorks Audio Hijacker.</li>
+              <li>Seleccionas dispositivo de salida (sistema) y tu micrófono.</li>
+              <li>Ajustas niveles de prueba, que no pique en rojo.</li>
+              <li>Presionas <strong>REC</strong> antes de iniciar tu programa, clase o sesión.</li>
+              <li>Al detener, se guarda automáticamente el archivo .wav en tu carpeta.</li>
+            </ol>
+            <p style="margin-top:0.6rem;color:var(--muted);font-size:0.82rem;">
+              Ideal para capturar Zoom, navegadores, DAWs, players, juegos y cualquier cosa
+              que esté sonando por tu salida seleccionada.
+            </p>
+          </article>
+
+          <article class="card" id="download">
+            <div class="pill">
+              💾 Descarga
+              <span>Versión beta</span>
+            </div>
+            <h2 class="card-title">Descarga MonkeyWorks Audio Hijacker</h2>
+            <p>
+              Esta es una build en desarrollo, pensada para pruebas internas, amigos y
+              cómplices del sonido. Úsala con cariño y envía feedback.
+            </p>
+
+            <div class="download-section">
+              <!-- TODO: Reemplaza # con el link real a tu instalador o .zip -->
+              <a href="#" class="btn btn-primary" style="width:100%;justify-content:center;">
+                Descargar instalador (.exe / .zip)
+              </a>
+              <a href="#" class="btn btn-ghost" style="width:100%;justify-content:center;">
+                Ver video demo de uso
+              </a>
+
+              <ul class="list">
+                <li>SO: Windows 10 o superior.</li>
+                <li>Requiere permisos de ejecución (marca como confiable si Windows avisa).</li>
+                <li>Funciona mejor con drivers de audio estables y un solo dispositivo de salida principal.</li>
+              </ul>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <!-- SOPORTE / CONTACTO -->
+      <section class="section" id="support">
+        <div class="section-columns">
+          <article class="card">
+            <h2 class="card-title">Soporte & Feedback</h2>
+            <p>
+              Si algo se rompe, si encontraste un bug raro o quieres proponer una función,
+              tu feedback es literalmente oro puro para seguir puliendo esta herramienta.
+            </p>
+            <p class="feature-text" style="margin-top:0.4rem;">
+              Puedes anotar aquí tu correo, Instagram, página de Hivari, GitHub o lo que prefieras
+              para que la banda se comunique directamente contigo.
+            </p>
+            <ul class="list">
+              <li><strong>Email:</strong> tu-correo@ejemplo.com</li>
+              <li><strong>Instagram:</strong> @tuusuario</li>
+              <li><strong>GitHub / Repo:</strong> link al proyecto (opcional).</li>
+            </ul>
+          </article>
+
+          <article class="card">
+            <h2 class="card-title">Roadmap mental (cosas que podrías agregar)</h2>
+            <ul class="list">
+              <li>Selector rápido de carpeta de grabación.</li>
+              <li>Atajos de teclado para REC / Stop.</li>
+              <li>Pequeña mezcla interna: balance sistema/mic.</li>
+              <li>Indicador de espacio libre en disco.</li>
+              <li>Export rápido a .mp3 para compartir.</li>
+            </ul>
+            <p style="margin-top:0.6rem;color:var(--muted);font-size:0.82rem;">
+              Puedes actualizar este texto cuando la app tenga más funciones
+              e ir marcando qué ya está implementado.
+            </p>
+          </article>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <div class="footer-inner">
+        <div>© <span id="year"></span> MonkeyWorks · Audio Hijacker. Todos los derechos reservados.</div>
+        <div class="footer-links">
+          <a href="#features">Características</a>
+          <a href="#download">Descarga</a>
+          <a href="#support">Contacto</a>
+        </div>
+      </div>
+    </footer>
+  </div>
+
+  <script>
+    // Solo para año dinámico en el footer
+    document.getElementById("year").textContent = new Date().getFullYear();
+  </script>
+</body>
+</html>
